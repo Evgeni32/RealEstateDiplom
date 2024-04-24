@@ -1,0 +1,152 @@
+﻿@page "/property/{id}"
+@page "/property/{id}/{Town}"
+
+@using RealEstate.Web.Shared.PropertyModels
+<div class="container-xxl bg-white p-0">
+    <div class="container-fluid header bg-white p-0" style="margin-top: 10px">
+        @if (model == null)
+        {
+            <RealEstate.Web.Client.Components.Spiner></RealEstate.Web.Client.Components.Spiner>
+        }
+        else
+        {
+            <div class="row g-0 align-items-center flex-column-reverse flex-md-row">
+                <div class="col-md-6 p-5 mt-lg-5">
+                    @if (Town != null)
+                    {
+                        <h1 class="display-5 animated fadeIn mb-4">
+                            <span class="text-primary">@model.PropertyTypeName</span> за  продажба, @Town, @model.DistrictName
+                        </h1>
+
+                    }
+                    else
+                    {
+                        <h1 class="display-5 animated fadeIn mb-4">
+                            <span class="text-primary">@model.PropertyTypeName</span> за  продажба, в квартал @model.DistrictName
+                        </h1>
+                    }
+                </div>
+                <div class="col-md-6 animated fadeIn">
+                    <div class="carousel">
+                        <button @onclick="Previous">&lt;</button>
+                        <img src="@Images[currentIndex]" alt="carousel-image" />
+                        <button @onclick="Next">&gt;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="container" style="margin-top: 20px; margin-bottom: 20px">
+                <div class="bg-light rounded p-3">
+                    <div class="bg-white rounded p-4" style="border: 1px dashed rgba(0, 185, 142, .3)">
+                        <div class="row">
+                            <div class="col-sm-12 col-sm-12 col-md-6 col-lg-6">
+                                <p class="c-secondary">
+                                    Площ:
+                                    <span class="bold c-secondary">
+                                        @model.Area кв.м.
+                                    </span>
+                                </p>
+                            </div> <div class="col-sm-12 col-sm-12 col-md-6 col-lg-6">
+                                <p class="c-secondary">
+                                    Тип Имот:
+                                    <span class="bold c-secondary">
+                                        @model.PropertyTypeName
+                                    </span>
+                                </p>
+                            </div> <div class="col-sm-12 col-sm-12 col-md-6 col-lg-6">
+                                <p class="c-secondary">
+                                    Етаж:
+                                    <span class="bold c-secondary">
+                                        @model.Floor
+                                    </span>
+                                </p>
+                            </div> <div class="col-sm-12 col-sm-12 col-md-6 col-lg-6">
+                                <p class="c-secondary">
+                                    Ниво на обзавеждане:
+                                    <span class="bold c-secondary">
+                                        @model.FurnishedLevel
+                                    </span>
+                                </p>
+                            </div> <div class="col-sm-12 col-sm-12 col-md-6 col-lg-6">
+                                <p class="c-secondary">
+                                    Отопление:
+                                    <span class="bold c-secondary">
+                                        @model.Heating
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <p>
+                                @model.Description
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container" style="margin-top: 20px; margin-bottom: 20px">
+                <div class="row">
+                    <div class="col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+
+                        <iframe src=@($"https://maps.google.com/maps?q=%20{address},%20{Town}&t=&z=13&ie=UTF8&iwloc=&output=embed") width="100%" height="380" frameborder="0" style="border:0" allowfullscreen></iframe>
+                    </div>
+                    <div class="col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="bg-light rounded p-3">
+                            <div class="row">
+                                <p>Свържете се с нас</p>
+                            </div>
+                            <div class="d-flex align-items-center bg-white rounded p-3" style="border: 1px dashed rgba(0, 185, 142, .3)">
+                                <div class="icon me-3" style="width: 45px; height: 45px;">
+                                    <i class="fa fa-phone-alt text-primary"></i>
+                                </div>
+                                <span>
+                                    <a href="tel:+0897212403" style="text-decoration: none">0897 212 403</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        }
+    </div>
+    <RealEstate.Web.Client.Components.Footer></RealEstate.Web.Client.Components.Footer>
+</div>
+@code {
+
+    [Parameter]
+    public string? Id { get; set; }
+    [Parameter]
+    public string? Town { get; set; }
+    private List<string> Images = new();
+    private PropertyViewModel model { get; set; }
+    private int currentIndex = 0;
+    string address = "Александровска";
+    protected override async Task OnInitializedAsync()
+    {
+        Http = ClientFactory.CreateClient("RealEstate.Web.ServerAPI.NoAuthenticationClient");
+        try
+        {
+            var response = await Http.GetFromJsonAsync<PropertyViewModel>($"Property/GetPropertiyById?Id={Id}");
+            foreach (var item in response.ImagesUrls)
+            {
+                Images.Add(item.Url);
+            }
+            model = response;
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+    private void Next()
+    {
+        currentIndex = (currentIndex + 1) % Images.Count;
+    }
+
+    private void Previous()
+    {
+        currentIndex = (currentIndex - 1 + Images.Count) % Images.Count;
+    }
+}

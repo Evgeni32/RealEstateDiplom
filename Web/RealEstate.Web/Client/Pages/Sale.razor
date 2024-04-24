@@ -1,0 +1,224 @@
+﻿@page "/sale/{selectedDistrictId}/{selectedTypeId}/{heating}/{furnitureLevel}/{selectedTown}/{from}/{to}/{floor}"
+
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using RealEstate.Web.Shared.DistrictModels
+@using RealEstate.Web.Shared.InputModels
+@using RealEstate.Web.Shared.PropertyModels
+@using RealEstate.Web.Shared.ViewModels
+@using Microsoft.AspNetCore.Components.Web
+<div class="container-xxl py-5">
+
+    <div class="container-fluid bg-primary mb-5 wow fadeIn">
+        <div class="container">
+            <EditForm Model="@inputModel" EditContext="@_editContext1" OnValidSubmit="@OnSubmit" class="form-group" enctype="multipart/form-data">
+                <DataAnnotationsValidator />
+                <div class="row g-2">
+                    <div class="col-md-10">
+                        <div class="row g-2">                           
+                            <div class="col-md-3 form-group">
+                                <span style="color: white"> Град</span>
+                                @if (indexModel?.Towns != null)
+                                {
+                                    <select class="form-select border-0 py-3" @onchange="SelectionChanged" value="@inputModel.selectedTown">
+
+                                        <option selected value="">Изберете град</option>
+                                        @foreach (var town in indexModel?.Towns)
+                                        {
+                                            <ValidationMessage For="@(() => inputModel.selectedTown)" />
+                                            <option value="@town.Id">@town.Name</option>
+                                        }
+                                    </select>
+                                }
+                            </div>
+                            <div class="col-md-3">
+                                <span style="color: white"> Квартал</span>
+                                <select class="form-select border-0 py-3" @bind="@inputModel.selectedDistrictId">
+                                    <ValidationMessage For="@(() => inputModel.selectedDistrictId)" />
+                                    <option selected>Изберете квартал</option>
+                                    @foreach (var district in districts.OrderBy(x=>x.Name))
+                                    {
+                                        <option value="@district.Id">@district.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <span style="color: white"> Тип</span>
+                                @if (indexModel?.Types != null)
+                                {
+                                    <select class="form-select border-0 py-3" @bind="@inputModel.selectedTypeId">
+                                        <ValidationMessage For="@(() => inputModel.selectedTypeId)" />
+                                        <option selected disabled>Тип имот</option>
+                                        @foreach (var type in indexModel?.Types)
+                                        {
+                                            <option value="@type.Id">@type.Name</option>
+                                        }
+                                    </select>
+                                }
+                            </div>
+                            <div class="col-md-3">
+                                <span style="color: white">Етаж</span>
+                                <input type="number" class="form-control border-0 py-3" @bind="@inputModel.Floor">
+                                <ValidationMessage For="@(() => inputModel.Floor)" />
+                            </div>
+                        </div>
+                        <div class="row g-2" style="margin-bottom: 20px;">
+                            <div class="col-md-3">
+                                <span style="color: white"> Отопление</span>
+                                @if (heatings != null)
+                                {
+                                    <select class="form-select border-0 py-3" @bind="@inputModel.heating">
+                                        @foreach (var heating in heatings)
+                                        {
+                                            <option value="@heating">@heating</option>
+                                        }
+                                    </select>
+                                }
+                            </div>
+                            <div class="col-md-3">
+                                <span style="color: white"> Обзавеждане</span>
+                                @if (furnitureLevels != null)
+                                {
+                                    <select required class="form-select border-0 py-3" @bind="@inputModel.furnitureLevel">
+                                        @foreach (var level in furnitureLevels)
+                                        {
+                                            <option value="@level">@level</option>
+                                        }
+                                    </select>
+                                }
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <span style="color: white"> Площ от</span>
+                                <ValidationMessage For="@(() => inputModel.from)" />
+                                <input type="text" class="form-control border-0 py-3" @bind="@inputModel.from">
+                            </div>
+                            <div class="col-md-3" form-group>
+                                <span style="color: white"> Площ до</span>
+                                <input type="text" class="form-control border-0 py-3" placeholder="ID на имота" @bind="@inputModel.to">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-2 d-flex justify-content-center align-items-center">
+                        <button class="btn btn-dark border-0 py-3" type="submit">Търси</button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+
+    </div>
+    <div class="container">
+        @if (this.properties == null)
+        {
+            <RealEstate.Web.Client.Components.Spiner></RealEstate.Web.Client.Components.Spiner>
+        }
+        else if (!this.properties.Any())
+        {
+            <RealEstate.Web.Client.Components.NotFound Text="Не намерихме имоти отговарящи на вашите критерии"></RealEstate.Web.Client.Components.NotFound>
+        }
+        else
+        {
+            @foreach (var item in properties)
+            {
+                <RealEstate.Web.Client.Components.Property Town="@item.TownName" Price="@item.Price.ToString()" ImgUrl="@item.ImagesUrls.First().Url" Status="@item.Status.ToString()"
+                                                   Type="@item.PropertyTypeName" Distinct="@item.DistrictName" Area="@item.Area.ToString()" id="@item.Id">
+                </RealEstate.Web.Client.Components.Property>
+            }
+        }
+    </div>
+    <RealEstate.Web.Client.Components.Footer></RealEstate.Web.Client.Components.Footer>
+</div>
+
+@code {
+    [Parameter]
+    public string? selectedDistrictId { get; set; }
+
+    [Parameter]
+    public string? selectedTypeId { get; set; }
+
+    [Parameter]
+    public string? heating { get; set; }
+
+    [Parameter]
+    public string? furnitureLevel { get; set; }
+    [Parameter]
+    public string? selectedTown { get; set; }
+
+    [Parameter]
+    public string? from { get; set; }
+    [Parameter]
+    public string? to { get; set; }
+    [Parameter]
+    public string? floor { get; set; }
+    public IndexInputModel? inputModel = new();
+    private IndexViewModel? indexModel;
+    private EditContext _editContext1;
+    private List<DistrictViewModel> districts = new List<DistrictViewModel>();
+    private List<string>? heatings = new List<string>() { "ТЕЦ", "Газ", "Друго" };
+    private List<string>? furnitureLevels = new List<string>() { "Обзаведен", "Необзаведен", "До ключ" };
+    private List<PropertyViewModel>? properties { get; set; }
+
+    private string selectedTowns = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Http = ClientFactory.CreateClient("RealEstate.Web.ServerAPI.NoAuthenticationClient");
+        try
+        {
+     
+            indexModel = await Http.GetFromJsonAsync<IndexViewModel>("Index");
+            inputModel.selectedDistrictId = selectedDistrictId;
+            inputModel.from = from;
+            inputModel.to = to;
+            inputModel.furnitureLevel = furnitureLevel;
+            inputModel.heating = heating;
+            inputModel.selectedTown = selectedTown;
+            inputModel.selectedTypeId = selectedTypeId;
+            selectedTowns = selectedTown;
+            inputModel.Floor = int.Parse(floor);
+            LoadDistricts(selectedTown);
+            var response = await Http.PostAsJsonAsync<IndexInputModel>($"Property/SearchProperties", inputModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var res = await response.Content.ReadFromJsonAsync<IEnumerable<PropertyViewModel>>();
+                properties = res.ToList();
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private void SelectionChanged(ChangeEventArgs e)
+    {
+        selectedTown = e.Value.ToString();
+        LoadDistricts(selectedTown);
+        // You can add any additional logic here upon selection change
+    }
+    private void LoadDistricts(string townId)
+    {
+        // Assuming indexModel contains data about towns and districts
+        var selectedTown = indexModel.Towns.FirstOrDefault(town => town.Id == townId);
+        districts = selectedTown.Districts.ToList();
+
+        if (selectedTown != null)
+        {
+            districts = selectedTown.Districts.ToList();
+        }
+        //else
+        //{
+        //    districts.Clear(); // Clear districts if no town is selected
+        //}
+    }
+    private async Task OnSubmit()
+    {
+        var response = await Http.PostAsJsonAsync<IndexInputModel>("Property/SearchProperties", inputModel);
+        if (response.IsSuccessStatusCode)
+        {
+            var res = await response.Content.ReadFromJsonAsync<IEnumerable<PropertyViewModel>>();
+            properties = res.ToList();
+        }
+    }
+}

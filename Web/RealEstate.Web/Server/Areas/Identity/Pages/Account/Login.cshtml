@@ -1,0 +1,96 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+
+        <div class="col-xl-10 col-lg-12 col-md-9">
+
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-block bg-login-image">
+                            <div class="image-container">
+                                <img src="~/images/login.jpg" asp-append-version="true" class="center img-fluid">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4">Добре дошли отново!</h1>
+                                </div>
+                                <div asp-validation-summary="All" class="text-danger"></div>
+                                <form class="user" method="post">
+                                    <div class="form-group">
+                                        <label asp-for="Input.Email"></label>
+                                        <input asp-for="Input.Email" type="email" class="form-control form-control-user"
+                                               id="exampleInputEmail" aria-describedby="emailHelp"
+                                               placeholder="Въведете имейл адрес..." />
+                                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="Input.Password"></label>
+                                        <input asp-for="Input.Password" type="password" class="form-control form-control-user"
+                                               id="exampleInputPassword" placeholder="Парола" />
+                                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group" style="margin-top:10px;">
+                                        <div class="checkbox">
+                                            <label asp-for="Input.RememberMe">
+                                                <input asp-for="Input.RememberMe" />
+                                                @Html.DisplayNameFor(m => m.Input.RememberMe)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-100 btn btn-lg btn-primary mt-2">Вход</button>
+
+                                    <hr>
+
+                                </form>
+
+                                <div class="text-center">
+                                    <a class="small" id="forgot-password" asp-page="./ForgotPassword">Забравена парола?</a>
+                                </div>
+
+                                <div class="text-center">
+                                    <a class="small" asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Нова регистрация</a>
+                                </div>
+                                @*<div class="text-center">
+                                <a class="small" id="resend-confirmation" asp-page="./ResendEmailConfirmation">Повторно изпращане на потвърждение</a>
+
+                                </div>*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<style>
+    .image-container {
+        height: 100%; /* Ensure the container fills the entire height of the column */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .bg-login-image {
+        background-color: #f8f9fc; /* Set a background color for the image column if needed */
+    }
+
+    .center {
+        max-width: 100%; /* Ensure the image doesn't exceed the column width */
+        max-height: 100%; /* Ensure the image doesn't exceed the column height */
+    }
+</style>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

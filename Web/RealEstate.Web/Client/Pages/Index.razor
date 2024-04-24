@@ -1,0 +1,284 @@
+﻿@page "/"
+@using RealEstate.Web.Shared
+@using RealEstate.Web.Shared.ViewModels
+
+<PageTitle>Index</PageTitle>
+
+<div class="container-xxl bg-white p-0" id="1">
+
+    <div class="container-fluid header bg-white p-0">
+        <div class="row g-0 align-items-center flex-column-reverse flex-md-row">
+            <div class="col-md-6 p-5 mt-lg-5">
+                <h1 class="display-5 animated fadeIn mb-4">
+                    Намерете
+                    <span class="text-primary">перфектен дом</span> за вас и вашето семейство
+                </h1>
+            </div>
+            <div class="col-md-6 animated fadeIn">
+                <div class="owl-carousel header-carousel">
+                    <div class="owl-carousel-item">
+                        <img class="img-fluid" src="img/carousel-1.jpg" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid bg-primary mb-5 wow fadeIn">
+        <div class="container">
+            <EditForm Model="@inputModel" EditContext="@_editContext" OnValidSubmit="@OnSubmit" class="form-group" enctype="multipart/form-data">
+                <DataAnnotationsValidator />
+                <div class="row g-2">
+                    <div class="col-md-10">
+                        <div class="row g-2">
+                            <div class="col-md-3 form-group">
+                                <span style="color: white"> Град</span>
+                                @if (indexModel?.Towns != null)
+                                {
+                                    <select class="form-select border-0 py-3" @onchange="SelectionChanged" value="@inputModel.selectedTown">
+
+                                        <option selected value="">Изберете град</option>
+                                        @foreach (var town in indexModel.Towns.OrderBy(x=>x.Name))
+                                        {
+
+                                            <option value="@town.Id">@town.Name</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => inputModel.selectedTown)" />
+                                }
+                            </div>
+                            <div class="col-md-3">
+                                <span style="color: white"> Квартал</span>
+                                <select class="form-select border-0 py-3" @bind="@inputModel.selectedDistrictId">
+
+                                    <option selected disabled>Изберете квартал</option>
+                                    @foreach (var district in districts)
+                                    {
+                                        <option value="@district.Id">@district.Name</option>
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => inputModel.selectedDistrictId)" />
+                            </div>
+                            <div class="col-md-3">
+                                <span style="color: white"> Тип</span>
+                                @if (indexModel?.Types != null)
+                                {
+                                    <select class="form-select border-0 py-3" @bind="@inputModel.selectedTypeId">
+                                        <option selected disabled>Тип имот</option>
+                                        @foreach (var type in indexModel?.Types)
+                                        {
+                                            <option value="@type.Id">@type.Name</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => inputModel.selectedTypeId)" />
+                                }
+                            </div>
+                            <div class="col-md-3">
+                                <span style="color: white">Етаж</span>
+                                <input type="number" class="form-control border-0 py-3" @bind="@inputModel.Floor">
+                                <ValidationMessage For="@(() => inputModel.selectedTown)" />
+                            </div>
+                        </div>
+                        <div class="row g-2" style="margin-bottom: 20px;">
+                            <div class="col-md-3">
+                                <span style="color: white"> Отопление</span>
+                                @if (heatings != null)
+                                {
+                                    <select class="form-select border-0 py-3" @bind="@inputModel.heating">
+                                        <option selected value="">Отопление</option>
+                                        @foreach (var heating in heatings)
+                                        {
+                                            <option value="@heating">@heating</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => inputModel.heating)" />
+                                }
+                            </div>
+                            <div class="col-md-3">
+                                <span style="color: white"> Обзавеждане</span>
+                                @if (furnitureLevel != null)
+                                {
+                                    <select required class="form-select border-0 py-3" @bind="@inputModel.furnitureLevel">
+                                        <option selected value="">Обзавеждане</option>
+                                        @foreach (var level in furnitureLevel)
+                                        {
+                                            <option value="@level">@level</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => inputModel.furnitureLevel)" />
+                                }
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <span style="color: white"> Площ от</span>
+
+                                <input type="text" class="form-control border-0 py-3" @bind="@inputModel.from">
+                                <ValidationMessage For="@(() => inputModel.from)" />
+                            </div>
+                            <div class="col-md-3" form-group>
+                                <span style="color: white"> Площ до</span>
+                                <input type="text" class="form-control border-0 py-3" @bind="@inputModel.to">
+                                <ValidationMessage For="@(() => inputModel.to)" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-2 d-flex justify-content-center align-items-center">
+                        <button class="btn btn-dark border-0 py-3" type="submit">Търси</button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
+                <h1 class="mb-3">Видове имоти</h1>
+
+            </div>
+            <div class="row g-4">
+                @if (indexModel?.countsModels != null)
+                {
+                    <RealEstate.Web.Client.Components.TypeProperty ImgUrl="img/icon-apartment.png" Type="@indexModel.countsModels[0].Name" Count="@indexModel.countsModels[0].Count"></RealEstate.Web.Client.Components.TypeProperty>
+                    <RealEstate.Web.Client.Components.TypeProperty ImgUrl="img/icon-villa.png" Type="@indexModel.countsModels[1].Name" Count="indexModel.countsModels[1].Count"></RealEstate.Web.Client.Components.TypeProperty>
+                    <RealEstate.Web.Client.Components.TypeProperty ImgUrl="img/icon-house.png" Type="@indexModel.countsModels[2].Name" Count="indexModel.countsModels[2].Count"></RealEstate.Web.Client.Components.TypeProperty>
+                    <RealEstate.Web.Client.Components.TypeProperty ImgUrl="img/icon-housing.png" Type="@indexModel.countsModels[3].Name" Count="indexModel.countsModels[3].Count"></RealEstate.Web.Client.Components.TypeProperty>
+                    <RealEstate.Web.Client.Components.TypeProperty ImgUrl="img/icon-building.png" Type="@indexModel.countsModels[4].Name" Count="indexModel.countsModels[4].Count"></RealEstate.Web.Client.Components.TypeProperty>
+                    <RealEstate.Web.Client.Components.TypeProperty ImgUrl="img/icon-neighborhood.png" Type="@indexModel.countsModels[5].Name" Count="indexModel.countsModels[5].Count"></RealEstate.Web.Client.Components.TypeProperty>
+                    <RealEstate.Web.Client.Components.TypeProperty ImgUrl="img/icon-condominium.png" Type="@indexModel.countsModels[6].Name" Count="indexModel.countsModels[6].Count"></RealEstate.Web.Client.Components.TypeProperty>
+                    <RealEstate.Web.Client.Components.TypeProperty ImgUrl="img/icon-luxury.png" Type="@indexModel.countsModels[7].Name" Count="indexModel.countsModels[7].Count"></RealEstate.Web.Client.Components.TypeProperty>
+
+                }
+            </div>
+        </div>
+    </div>
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s">
+                    <div class="about-img position-relative overflow-hidden p-5 pe-0">
+                        <img class="img-fluid w-100" src="img/about.jpg">
+                    </div>
+                </div>
+                <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s">
+                    <h1 class="mb-4">№1 място за намиране на идеалния имот</h1>
+                    <p class="mb-4">
+                        Ние сме съсредоточени в областта на недвижимите имоти и разполагаме със значителен опит. Нашите брокери са обучени и знаещи специалисти, които могат да ви помогнат да намерите идеалния имот според вашите нужди.
+                    </p>
+                    <p><i class="fa fa-check text-primary me-3"></i>Професионализъм и опит</p>
+                    <p><i class="fa fa-check text-primary me-3"></i>Разнообразие от имоти</p>
+                    <p><i class="fa fa-check text-primary me-3"></i>Подкрепа през целия процес</p>
+                    <p><i class="fa fa-check text-primary me-3"></i>Прозрачност и честност</p>
+                    <a class="btn btn-primary py-3 px-5 mt-3" href="/why-should-i-buy">Прочети повече</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="row g-0 gx-5 align-items-end">
+                <div class="col-lg-6">
+                    <div class="text-start mx-auto mb-5 wow slideInLeft" data-wow-delay="0.1s">
+                        <h1 class="mb-3">Топ имоти</h1>
+                        <p>Нашите топ имоти.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane fade show p-0 active">
+                    <div class="row g-4">
+                        @if (indexModel?.Properties != null)
+                        {
+                            @foreach (var item in indexModel.Properties)
+                            {
+                                <RealEstate.Web.Client.Components.Property Town="@item.TownName" Price="@item.Price.ToString()" ImgUrl="@item.ImagesUrls.First().Url" Status="@item.Status.ToString()"
+                                                                   Type="@item.PropertyTypeName" Distinct="@item.DistrictName" Area="@item.Area.ToString()" id="@item.Id">
+                                </RealEstate.Web.Client.Components.Property>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="bg-light rounded p-3">
+                <div class="bg-white rounded p-4" style="border: 1px dashed rgba(0, 185, 142, .3)">
+                    <div class="row g-5 align-items-center">
+                        <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s">
+                            <img class="img-fluid rounded w-100" src="img/call-to-action.jpg" alt="">
+                        </div>
+                        <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s">
+                            <div class="mb-4">
+                                <h1 class="mb-3">Свържете се с наш сертифициран агент</h1>
+                                <p>Свържете се с наш сертифициран агент или с нашият офис за да намерим мечтаният от вас дом.</p>
+                            </div>
+                            <a href="tel:+0897212403" class="btn btn-primary py-3 px-4 me-2"><i class="fa fa-phone-alt me-2"></i>Обадете се</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
+                <h1 class="mb-3">Нашите топ- агенти</h1>
+
+            </div>
+            <div class="row g-4">
+                <RealEstate.Web.Client.Components.Agent Name="Петя Петрова" ImgUrl="img/team-1.jpg"></RealEstate.Web.Client.Components.Agent>
+                <RealEstate.Web.Client.Components.Agent Name="Нешо Нешев" ImgUrl="img/team-2.jpg"></RealEstate.Web.Client.Components.Agent>
+                <RealEstate.Web.Client.Components.Agent Name="Ваня Иванова" ImgUrl="img/team-3.jpg"></RealEstate.Web.Client.Components.Agent>
+                <RealEstate.Web.Client.Components.Agent Name="Иван Иванов" ImgUrl="img/team-4.jpg"></RealEstate.Web.Client.Components.Agent>
+
+            </div>
+        </div>
+    </div>
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
+                <h1 class="mb-3">Клиентите за нас!</h1>
+            </div>
+            <div class="owl-carousel testimonial-carousel wow fadeInUp" data-wow-delay="0.1s">
+                <div class="testimonial-item bg-light rounded p-3">
+                    <div class="bg-white border rounded p-4">
+                        <p>Впечатлен съм от обслужването и отношението. Екипът беше до мен през цялото време, когато имах нужда от тях. Това трябва да е стандарт! </p>
+                        <div class="d-flex align-items-center">
+                            <img class="img-fluid flex-shrink-0 rounded" src="img/testimonial-3.jpg" style="width: 45px; height: 45px;">
+                            <div class="ps-3">
+                                <h6 class="fw-bold mb-1">Галин</h6>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-item bg-light rounded p-3">
+                    <div class="bg-white border rounded p-4">
+                        <p>Изключителни професионалисти. Работят с усмивка.</p>
+                        <div class="d-flex align-items-center">
+                            <img class="img-fluid flex-shrink-0 rounded" src="img/testimonial-2.jpg" style="width: 45px; height: 45px;">
+                            <div class="ps-3">
+                                <h6 class="fw-bold mb-1">Иван</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-item bg-light rounded p-3">
+                    <div class="bg-white border rounded p-4">
+                        <p>Нешо е страхотен брокер!  Той искрено разбра нашия проблем и оказа помощ, за която другите дори не се замисляха.  Иска ми се да има повече такива мили и честни хора. Горещо препоръчвам</p>
+                        <div class="d-flex align-items-center">
+                            <img class="img-fluid flex-shrink-0 rounded" src="img/testimonial-1.jpg" style="width: 45px; height: 45px;">
+                            <div class="ps-3">
+                                <h6 class="fw-bold mb-1">Таня</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <RealEstate.Web.Client.Components.Footer></RealEstate.Web.Client.Components.Footer>
+</div>
+@code {
+    private EditContext _editContext;
+}

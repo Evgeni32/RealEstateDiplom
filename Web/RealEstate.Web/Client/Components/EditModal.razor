@@ -1,0 +1,143 @@
+﻿@using RealEstate.Web.Shared.PropertyModels
+@inject HttpClient Http
+<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <h5 class="modal-title">Променете имот ид: @viewModel.Id</h5>
+
+            </div>
+            <div class="modal-body">
+                @if (inputModel == null)
+                {
+                    <Spiner></Spiner>
+                }
+                else
+                {
+                    <EditForm Model="@inputModel" Context="formContext" Context="form" class="form-group" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class=" form-group form-focus">
+                                <span style="color: black"> Отопление</span>
+                                <select class="form-select " @bind="@inputModel.Heating" style="border-color:black">
+                                    <option selected disabled>Отопление</option>
+                                    @foreach (var heating in heatings)
+                                    {
+                                        <option value="@heating">@heating</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>             
+                        <div class=" form-group">
+                            <span style="color: black"> Обзавеждане</span>
+                            <select class="form-select" @bind="@inputModel.FurnishedLevel" style="border-color:black">
+                                <option selected disabled>Обзавеждане</option>
+                                @foreach (var level in furnitureLevel)
+                                {
+                                    <option value="@level">@level</option>
+                                }
+                            </select>
+                        </div>
+                        <div class=" form-group">
+                            <span style="color: black"> Satus</span>
+                            <select class="form-select " @bind="@inputModel.Status" style="border-color:black">
+                                <option selected disabled>Статус</option>
+                                @foreach (var level in statuses)
+                                {
+                                    <option value="@level">@level</option>
+                                }
+                            </select>
+                        </div>
+                        <div class=" form-group">
+                            <span style="color: black">Квадратура</span>
+                            <input type="number" class="form-control" @bind="@inputModel.Area" style="border-color:black">
+                        </div>
+                        <div class=" form-group">
+                            <span style="color: black"> Цена</span>
+                            <input type="number" class="form-control " @bind="@inputModel.Price" style="border-color:black">
+                        </div>
+                        <div class=" form-group">
+                            <span style="color: black">Етаж</span>
+                            <input type="text" class="form-control " @bind="@inputModel.Floor" style="border-color:black">
+                        </div>
+                        <div class=" form-group">
+                            <span style="color: blask">Описание</span>
+                            <textarea type="text" class="form-control" @bind="@inputModel.Description" style="border-color:black"></textarea>
+                        </div>
+                        
+                    </EditForm>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="@Save">Запази</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Затвори</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+
+@code {
+
+    [Parameter]
+    public PropertyViewModel? viewModel { get; set; }
+    private PropertyUpdateModalModel? inputModel;
+    public Guid Guid = Guid.NewGuid();
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+    private List<string>? heatings = new List<string>() { "ТЕЦ", "Газ", "Друго" };
+    private List<string>? furnitureLevel = new List<string>() { "Обзаведен", "Необзаведен", "До ключ" };
+    private List<string>? statuses = new List<string>() { " Buy", "Sold", "Rental" };
+    [Parameter]
+    public EventCallback<PropertyViewModel> OnDoneCallback { get; set; }
+
+
+    public void Open(PropertyViewModel model)
+    {
+
+        inputModel = new PropertyUpdateModalModel();
+        inputModel.PropertyId = model.Id;
+        inputModel.Price = (double)model.Price;
+        inputModel.Area = (double)model.Area;
+        inputModel.Floor = (int)model.Floor;
+        inputModel.Heating = model.Heating;
+        inputModel.FurnishedLevel = model.FurnishedLevel;
+        inputModel.Description = model.Description;
+        inputModel.Status = model.Status;
+        inputModel.PropertyTypeId = model.PropertyTypeId;
+
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        viewModel = model;
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        StateHasChanged();
+    }
+    private async Task Save()
+    {
+
+        inputModel.Statute = inputModel.Status.ToString();
+        var status = await Http.PutAsJsonAsync<PropertyUpdateModalModel>("Property/UpdateById", inputModel);
+        if (status.IsSuccessStatusCode)
+        {
+            this.inputModel = new PropertyUpdateModalModel();
+            StateHasChanged();
+            Close();
+        }
+
+    }
+}

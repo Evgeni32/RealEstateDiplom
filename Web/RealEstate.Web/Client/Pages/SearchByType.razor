@@ -1,0 +1,67 @@
+﻿@page "/search-by-type/{type}"
+@using RealEstate.Web.Shared.PropertyModels
+<div class="container-xxl py-5">
+
+    <div class="container">
+        @if (this.properties == null)
+        {
+            <RealEstate.Web.Client.Components.Spiner></RealEstate.Web.Client.Components.Spiner>
+        }
+        else if (!this.properties.Any())
+        {
+            <RealEstate.Web.Client.Components.NotFound Text="Не намерихме имоти които да отговарят на зададените критерии">
+
+            </RealEstate.Web.Client.Components.NotFound>
+        }
+        else
+        {
+            <div class="container-fluid bg-primary mb-5">
+                <div class="row g-0 gx-5 justify-content-center">
+                    <div class="col-lg-6">
+                        <div class="text-center mx-auto mb-5 wow slideInLeft" data-wow-delay="0.1s">
+                            <h1 class="mb-3" style="color: white;">@Type</h1>
+                            <p style="color: white;">Нашите топ имоти.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid bg-white mb-5">
+                <div class="tab-content" style="margin-bottom: 20px;">
+                    <div id="tab-1" class="tab-pane fade show p-0 active">
+                        <div class="row g-4">
+                            @if (properties != null)
+                            {
+                                @foreach (var item in properties)
+                                {
+                                    <RealEstate.Web.Client.Components.Property Town="@item.TownName" Price="@item.Price.ToString()" ImgUrl="@item.ImagesUrls.First().Url" Status="@item.Status.ToString()"
+                                                                   Type="@item.PropertyTypeName" Distinct="@item.DistrictName" Area="@item.Area.ToString()" id="@item.Id">
+                                    </RealEstate.Web.Client.Components.Property>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@code {
+    [Parameter]
+    public string? Type { get; set; }
+    private List<PropertyViewModel>? properties { get; set; }
+    private bool isDataLoaded = false;
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Type != null && !isDataLoaded)
+        {
+            Http = ClientFactory.CreateClient("RealEstate.Web.ServerAPI.NoAuthenticationClient");
+            var response = await Http.PostAsJsonAsync<string>("Property/SearchByType", Type);
+            if (response.IsSuccessStatusCode)
+            {
+                var res = await response.Content.ReadFromJsonAsync<IEnumerable<PropertyViewModel>>();
+                this.properties = res.ToList();
+                isDataLoaded = true;
+            }
+        }
+    }
+}
